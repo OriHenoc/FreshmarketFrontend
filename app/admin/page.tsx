@@ -82,6 +82,7 @@ const defaultStats = {
 const statusConfig = {
   pending: { label: "En attente", color: "bg-yellow-500", textColor: "text-yellow-700", bgColor: "bg-yellow-100" },
   confirmed: { label: "Confirmée", color: "bg-blue-500", textColor: "text-blue-700", bgColor: "bg-blue-100" },
+  preparing: { label: "En préparation", color: "bg-orange-500", textColor: "text-orange-700", bgColor: "bg-orange-100" },
   shipped: { label: "Expédiée", color: "bg-purple-500", textColor: "text-purple-700", bgColor: "bg-purple-100" },
   delivered: { label: "Livrée", color: "bg-green-500", textColor: "text-green-700", bgColor: "bg-green-100" },
   cancelled: { label: "Annulée", color: "bg-red-500", textColor: "text-red-700", bgColor: "bg-red-100" },
@@ -1711,7 +1712,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Modals */}
-      {selectedOrder && <OrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />}
+      {selectedOrder && <OrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} deliverySlots={deliverySlots} />}
       {selectedProduct && <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
       {showCreateOrderModal && (
         <CreateOrderModal onClose={() => setShowCreateOrderModal(false)} onSave={handleSaveOrder} />
@@ -2066,7 +2067,7 @@ function CustomerRow({ customer, orders }: { customer: any; orders: any[] }) {
   )
 }
 
-function OrderModal({ order, onClose }: { order: any; onClose: () => void }) {
+function OrderModal({ order, onClose, deliverySlots }: { order: any; onClose: () => void; deliverySlots: any[] }) {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={onClose}>
       <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white border shadow-2xl" onClick={(e) => e.stopPropagation()}>
@@ -2110,6 +2111,15 @@ function OrderModal({ order, onClose }: { order: any; onClose: () => void }) {
               </p>
               <p className="text-gray-700 mb-2">
                 <strong>Paiement :</strong> {order.paymentMethod || "Non spécifié"}
+              </p>
+              <p className="text-gray-700 mb-2">
+                <strong>Créneau de livraison :</strong> 
+                <p>{order.delivery?.deliverySlot ? 
+                  (() => {
+                    const slot = deliverySlots.find(s => s._id === order.delivery.deliverySlot)
+                    return slot ? `${slot.name} (${slot.startTime} - ${slot.endTime})` : "Créneau non trouvé"
+                  })() : 
+                  "Non spécifié"}</p>
               </p>
               <p className="text-gray-700">
                 <strong>Total :</strong> 

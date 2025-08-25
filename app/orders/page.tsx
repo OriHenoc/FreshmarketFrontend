@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/context/auth-context"
-import { getMyOrders as apiGetMyOrders } from "@/lib/api"
+import { getMyOrders as apiGetMyOrders, fetchDeliverySlots } from "@/lib/api"
 
 // Données simulées des commandes
 const mockOrders = [
@@ -84,6 +84,7 @@ export default function OrdersPage() {
   const { user } = useAuth()
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null)
   const [orders, setOrders] = useState<any[]>(mockOrders)
+  const [deliverySlots, setDeliverySlots] = useState<any[]>([])
 
   useEffect(() => {
     ;(async () => {
@@ -95,6 +96,18 @@ export default function OrdersPage() {
       } catch {}
     })()
   }, [user])
+
+  useEffect(() => {
+    const loadDeliverySlots = async () => {
+      try {
+        const slots = await fetchDeliverySlots()
+        setDeliverySlots(slots)
+      } catch (error) {
+        console.error('Erreur lors du chargement des créneaux de livraison:', error)
+      }
+    }
+    loadDeliverySlots()
+  }, [])
 
   if (!user) {
     return (
@@ -201,7 +214,7 @@ export default function OrdersPage() {
                 orders
                   .filter((order) => order.status !== "delivered")
                   .map((order) => (
-                    <OrderCard key={order.id || order._id || Math.random()} order={order} onViewDetails={setSelectedOrder} />
+                    <OrderCard key={order.id || order._id || Math.random()} order={order} onViewDetails={setSelectedOrder} deliverySlots={deliverySlots} />
                   ))
               ) : (
                 <div className="text-center py-8">
@@ -216,7 +229,7 @@ export default function OrdersPage() {
                 orders
                   .filter((order) => order.status === "delivered")
                   .map((order) => (
-                    <OrderCard key={order.id || order._id || Math.random()} order={order} onViewDetails={setSelectedOrder} />
+                    <OrderCard key={order.id || order._id || Math.random()} order={order} onViewDetails={setSelectedOrder} deliverySlots={deliverySlots} />
                   ))
               ) : (
                 <div className="text-center py-8">
@@ -233,6 +246,7 @@ export default function OrdersPage() {
         <OrderDetailsModal
           order={orders.find((o) => (o.id || o._id) === selectedOrder)!}
           onClose={() => setSelectedOrder(null)}
+          deliverySlots={deliverySlots}
         />
       )}
 
@@ -241,7 +255,7 @@ export default function OrdersPage() {
   )
 }
 
-function OrderCard({ order, onViewDetails }: { order: any; onViewDetails: (id: string) => void }) {
+function OrderCard({ order, onViewDetails, deliverySlots }: { order: any; onViewDetails: (id: string) => void; deliverySlots: any[] }) {
   const statusInfo = statusConfig[order.status as keyof typeof statusConfig] || statusConfig.default
   const StatusIcon = statusInfo?.icon || Clock
 
@@ -270,6 +284,18 @@ function OrderCard({ order, onViewDetails }: { order: any; onViewDetails: (id: s
           </div>
           <span className="font-bold text-lg text-orange-600">{order.total ? order.total.toLocaleString("fr-FR") : "0"} F CFA</span>
         </div>
+        
+        {order.delivery?.deliverySlot && (
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-blue-400" />
+            <span className="text-sm text-gray-600">
+              Créneau : {(() => {
+                const slot = deliverySlots.find(s => s._id === order.delivery.deliverySlot)
+                return slot ? `${slot.name} (${slot.startTime} - ${slot.endTime})` : "Créneau non trouvé"
+              })()}
+            </span>
+          </div>
+        )}
 
         <div className="space-y-2">
           {Array.isArray(order.items) && order.items.length > 0 ? (
@@ -301,7 +327,7 @@ function OrderCard({ order, onViewDetails }: { order: any; onViewDetails: (id: s
   )
 }
 
-function OrderDetailsModal({ order, onClose }: { order: any; onClose: () => void }) {
+function OrderDetailsModal({ order, onClose, deliverySlots }: { order: any; onClose: () => void; deliverySlots: any[] }) {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={onClose}>
       <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl" onClick={(e) => e.stopPropagation()}>
@@ -375,6 +401,17 @@ function OrderDetailsModal({ order, onClose }: { order: any; onClose: () => void
                 <MapPin className="h-4 w-4 text-gray-400" />
                 <span className="text-gray-700">{order.delivery?.address || order.deliveryAddress || "Adresse non spécifiée"}</span>
               </div>
+              {order.delivery?.deliverySlot && (
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-blue-500" />
+                  <span className="text-gray-700">
+                    Créneau : {(() => {
+                      const slot = deliverySlots.find(s => s._id === order.delivery.deliverySlot)
+                      return slot ? `${slot.name} (${slot.startTime} - ${slot.endTime})` : "Créneau non trouvé"
+                    })()}
+                  </span>
+                </div>
+              )}
               {order.delivery?.actualDate && (
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-500" />

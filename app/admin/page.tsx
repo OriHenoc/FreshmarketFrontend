@@ -2117,7 +2117,7 @@ function OrderModal({ order, onClose, deliverySlots }: { order: any; onClose: ()
                 <p>{order.delivery?.deliverySlot ? 
                   (() => {
                     const slot = findDeliverySlot(order.delivery.deliverySlot, deliverySlots)
-                    return slot ? `${slot.name} (${slot.startTime} - ${slot.endTime})` : "Créneau non trouvé"
+                    return slot ? `${slot.startTime} - ${slot.endTime}` : "Créneau non trouvé"
                   })() : 
                   "Non spécifié"}</p>
               </p>

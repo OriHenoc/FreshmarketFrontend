@@ -329,3 +329,28 @@ export const deleteGlobalSetting = async (key: string) => {
   const { data } = await api.delete(`/api/global-settings/${key}`)
   return data
 }
+
+// Fonction utilitaire pour extraire l'ID du deliverySlot
+export const getDeliverySlotId = (deliverySlot: any): string | null => {
+  if (!deliverySlot) return null
+  
+  // Si c'est un objet peuplé avec _id
+  if (typeof deliverySlot === 'object' && deliverySlot._id) {
+    return deliverySlot._id
+  }
+  
+  // Si c'est directement un ID string
+  if (typeof deliverySlot === 'string') {
+    return deliverySlot
+  }
+  
+  return null
+}
+
+// Fonction utilitaire pour trouver un créneau de livraison
+export const findDeliverySlot = (deliverySlot: any, deliverySlots: any[]): any => {
+  const slotId = getDeliverySlotId(deliverySlot)
+  if (!slotId) return null
+  
+  return deliverySlots.find(s => s._id === slotId) || null
+}

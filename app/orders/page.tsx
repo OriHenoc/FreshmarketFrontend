@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/context/auth-context"
-import { getMyOrders as apiGetMyOrders, fetchDeliverySlots } from "@/lib/api"
+import { getMyOrders as apiGetMyOrders, fetchDeliverySlots, findDeliverySlot } from "@/lib/api"
 
 // Données simulées des commandes
 const mockOrders = [
@@ -290,7 +290,7 @@ function OrderCard({ order, onViewDetails, deliverySlots }: { order: any; onView
             <Clock className="h-4 w-4 text-blue-400" />
             <span className="text-sm text-gray-600">
               Créneau : {(() => {
-                const slot = deliverySlots.find(s => s._id === order.delivery.deliverySlot)
+                const slot = findDeliverySlot(order.delivery.deliverySlot, deliverySlots)
                 return slot ? `${slot.name} (${slot.startTime} - ${slot.endTime})` : "Créneau non trouvé"
               })()}
             </span>
@@ -406,7 +406,7 @@ function OrderDetailsModal({ order, onClose, deliverySlots }: { order: any; onCl
                   <Clock className="h-4 w-4 text-blue-500" />
                   <span className="text-gray-700">
                     Créneau : {(() => {
-                      const slot = deliverySlots.find(s => s._id === order.delivery.deliverySlot)
+                      const slot = findDeliverySlot(order.delivery.deliverySlot, deliverySlots)
                       return slot ? `${slot.name} (${slot.startTime} - ${slot.endTime})` : "Créneau non trouvé"
                     })()}
                   </span>

@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Select2 } from "@/components/ui/select2"
 import { Textarea } from "@/components/ui/textarea"
 import { useCart } from "@/context/cart-context"
-import { createOrder as apiCreateOrder, uploadImage as apiUploadImage, fetchPaymentMethods, fetchDeliverySlots, incrementDeliverySlotOrders, fetchCommunes, getCommuneDeliveryFee } from "@/lib/api"
+import { createOrder as apiCreateOrder, uploadImage as apiUploadImage, fetchPaymentMethods, fetchDeliverySlots, incrementDeliverySlotOrders, fetchCommunes, getCommuneDeliveryFee, findDeliverySlot } from "@/lib/api"
 import { useAuth } from "@/context/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
@@ -880,7 +880,7 @@ export default function CheckoutPage() {
                     <p className="text-sm font-medium text-gray-600 mb-1">Plage horaire de livraison</p>
                     <p className="font-medium text-gray-900 text-lg break-words overflow-wrap-anywhere">
                       {(() => {
-                        const selectedSlot = deliverySlots.find(slot => slot._id === displayDeliveryInfo.deliverySlot)
+                        const selectedSlot = findDeliverySlot(displayDeliveryInfo.deliverySlot, deliverySlots)
                         return selectedSlot ? `${selectedSlot.name} (${selectedSlot.startTime} - ${selectedSlot.endTime})` : "Plage non définie"
                       })()}
                     </p>

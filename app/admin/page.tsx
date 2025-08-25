@@ -61,7 +61,7 @@ import {
 import { Bar, Pie, Line } from "react-chartjs-2"
 import { fetchProductsForAdmin as apiFetchProducts, createProduct as apiCreateProduct, updateProduct as apiUpdateProduct, deleteProduct as apiDeleteProduct, uploadImage as apiUploadImage, fetchAllCategories } from "@/lib/api"
 import { fetchPaymentMethods, createPaymentMethod, updatePaymentMethod, deletePaymentMethod, updateOrderStatus as apiUpdateOrderStatus, fetchAdminOrders, uploadImage as apiUpload, recalculateProductSales } from "@/lib/api"
-import { fetchAdminStats, fetchAdminUsers, fetchAllPromotions, createPromotion, updatePromotion, deletePromotion, fetchCategories, createCategory, updateCategory, deleteCategory, fetchAllDeliverySlots, createDeliverySlot, updateDeliverySlot, deleteDeliverySlot, fetchAllCommunes, createCommune, updateCommune, deleteCommune, getGlobalSetting, updateGlobalSetting } from "@/lib/api"
+import { fetchAdminStats, fetchAdminUsers, fetchAllPromotions, createPromotion, updatePromotion, deletePromotion, fetchCategories, createCategory, updateCategory, deleteCategory, fetchAllDeliverySlots, createDeliverySlot, updateDeliverySlot, deleteDeliverySlot, fetchAllCommunes, createCommune, updateCommune, deleteCommune, getGlobalSetting, updateGlobalSetting, findDeliverySlot } from "@/lib/api"
 
 // Enregistrement des composants Chart.js
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, LineElement, PointElement)
@@ -2116,7 +2116,7 @@ function OrderModal({ order, onClose, deliverySlots }: { order: any; onClose: ()
                 <strong>Créneau de livraison :</strong> 
                 <p>{order.delivery?.deliverySlot ? 
                   (() => {
-                    const slot = deliverySlots.find(s => s._id === order.delivery.deliverySlot)
+                    const slot = findDeliverySlot(order.delivery.deliverySlot, deliverySlots)
                     return slot ? `${slot.name} (${slot.startTime} - ${slot.endTime})` : "Créneau non trouvé"
                   })() : 
                   "Non spécifié"}</p>
